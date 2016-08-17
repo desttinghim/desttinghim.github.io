@@ -6,8 +6,88 @@
     <description>Recent content on Desttinghim</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 16 Aug 2016 13:45:03 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 16 Aug 2016 17:07:14 -0500</lastBuildDate>
     <atom:link href="http://desttinghim.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Linear Encoders and Arduino</title>
+      <link>http://desttinghim.github.io/post/accuremote-scales/</link>
+      <pubDate>Tue, 16 Aug 2016 17:07:14 -0500</pubDate>
+      
+      <guid>http://desttinghim.github.io/post/accuremote-scales/</guid>
+      <description>
+
+&lt;p&gt;A couple of weeks ago, I started working on a project that requires me to find the position of single moving object in real time and record it. For this project, I am using a linear encoder to get this data. For those of you that do not know, a &lt;a href=&#34;https://en.wikipedia.org/wiki/Linear_encoder&#34;&gt;linear encoder&lt;/a&gt; is a sensor that detects it&amp;rsquo;s position on a scale (think of something like a ruler).&lt;/p&gt;
+
+&lt;p&gt;The linear encoder I am using is an Accuremote 38-inch scale (which can be found on the companies site &lt;a href=&#34;http://accuremoteusa.com/page8.html&#34;&gt;here&lt;/a&gt;). Overall it seems like a pretty nice scale. It is made of steel and comes with a little gadget (called a DRO) that lets you read where the linear encoder is on the scale in both inches and centimeters. The usual application for linear encoders is milling, and this looks like it would do just fine in that environment as is.&lt;/p&gt;
+
+&lt;p&gt;However, I need a computer to be able to read the linear encoder, and not a human. The DRO is attached using a USB mini cable, so it looked like it should be simple enough to read from. Before starting the project though, I decided to spend some time researching the scale. After a little bit of Googling, I found a few results.&lt;/p&gt;
+
+&lt;h2 id=&#34;research:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Research&lt;/h2&gt;
+
+&lt;p&gt;First, &lt;a href=&#34;http://www.yuriystoys.com/2013/12/selecting-scales-for-dro.html&#34;&gt;this site&lt;/a&gt; helped me learn that Accuremote and iGaging scales are identical in their electronics. This was useful in pointing me towards the next site.&lt;/p&gt;
+
+&lt;p&gt;The next place that I found was a fairly detailed breakdown of &lt;a href=&#34;http://www.shumatech.com/web/21bit_protocol?page=0,0&#34;&gt;how the DRO communicates with the linar encoder.&lt;/a&gt; As it turns out, it does not actually use the USB serial protocol, just the USB connecter. This means that while it looks like it could possible communicate directly with a computer, it can&amp;rsquo;t, and trying to do so could damage either the linear encoder, the computer, or both. This website also revealed that the protocol was 21-bit, and that the DRO was the master and the linear encoder was the slave. The site continues to talk about how you can use the Accuremote scale with their DRO.&lt;/p&gt;
+
+&lt;p&gt;After that, I was led back to the first website. As it turns out, this person had already made a &lt;a href=&#34;http://www.yuriystoys.com/2012/01/reading-gtizzly-igaging-scales-with.html&#34;&gt;guide to reading from the Accuremote scale!&lt;/a&gt; It includes code for an Arduino, as well as the possibility to send this data over bluetooth. This was almost exactly what I needed!&lt;/p&gt;
+
+&lt;p&gt;With these resources in mind, I was ready to start building the Arduino system.&lt;/p&gt;
+
+&lt;h2 id=&#34;implementing:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Implementing&lt;/h2&gt;
+
+&lt;p&gt;I had a few requirements in mind while I was making this system.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;I did not want to have &amp;ldquo;operate&amp;rdquo; directly on the linear encoder (cut wires, etc.)&lt;/li&gt;
+&lt;li&gt;I wanted the Arduino to fit in a case&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;At this point, I started trying to get everything to work together. The first step was to order some parts. I had an Arduino, but I needed a USB mini breakout board, as well as a case and a project board to keep everything tidy. Once the parts arrived in the mail, I followed the guide to connect the USB mini breakout board to the proper pins on the Arduino.&lt;/p&gt;
+
+&lt;p&gt;At this point, I tried using the latest code from yuriystoys website to run the Arduino. I uploaded the code to an Arduino Uno, and plugged everything in. I opened up the serial monitor and saw output. Success!&lt;/p&gt;
+
+&lt;p&gt;&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;Or not. All the readings from the scale were zero. Somehow I&amp;rsquo;d encountered a bug.&lt;/p&gt;
+
+&lt;h2 id=&#34;troubleshooting:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Troubleshooting&lt;/h2&gt;
+
+&lt;p&gt;My first thought was that there was some problem in the code. I tried to look through it, but the heavy use of registers made it difficult to read. I began looking for simpler code and found the guide I have posted above, so I tried using the code there.&lt;/p&gt;
+
+&lt;p&gt;This also returned all zeros. After consulting with my boss, we decided to try a different Arduino. We pulled out an Arduino Mega 2560 and modified the electronics.&lt;/p&gt;
+
+&lt;p&gt;Again, we tested it and were getting all zeros.&lt;/p&gt;
+
+&lt;p&gt;It was at this point that we started using the oscilloscope. We thought that I might have connected the breakout board up wrong. However, we discovered that was not the case. Instead, one of the solder joints wasn&amp;rsquo;t even connected! It looked like it was, but a continuity test proved that it was completely disconnected.&lt;/p&gt;
+
+&lt;p&gt;Now that we had finally found the issue, I soldered the loose joint up and tested everything once again. This time, it worked!&lt;/p&gt;
+
+&lt;p&gt;Well, kind of. The results I was getting were inconsistent. I looked through the code and managed to squash a few bugs, but that didn&amp;rsquo;t seem to solve everything. Eventually, I remembered reading during my research that the linear encoder had a maximum amount of reads per second. I didn&amp;rsquo;t know what the numbers were, so I went back to the oscilloscope.&lt;/p&gt;
+
+&lt;h2 id=&#34;reading-waveforms:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Reading waveforms&lt;/h2&gt;
+
+&lt;p&gt;The oscilloscope allowed me to work out the timings pretty well. I created a crude tool using an old USB mini cable and a USB mini breakout board that allowed us to read the signals that the DRO was creating, and the responses it was receiving from the linear encoder.&lt;/p&gt;
+
+&lt;p&gt;The numbers we discovered looked like this:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;There was an interval of about 800 microseconds between each read&lt;/li&gt;
+&lt;li&gt;Each read consisted of 21 clock pulses&lt;/li&gt;
+&lt;li&gt;The clock pulses were around 110 microseconds apart&lt;/li&gt;
+&lt;li&gt;The linear encoder takes around 10 microseconds to switch between high and low for each number&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;With these numbers in mind, I could get back to programming.&lt;/p&gt;
+
+&lt;h2 id=&#34;inputting-numbers:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Inputting Numbers&lt;/h2&gt;
+
+&lt;p&gt;After inputting the numbers I had discovered, the scale finally gave consistent results! With that out of the way, I could start working on the computer side program.&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion:7c6e58227ab9c3b98b6af2521fcc8851&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;This project was fairly straightforward, despite all the problems. In my mind, it helps to emphasize just how important a skill troubleshooting and debugging are. I could probably have had this all running in under a day if I hadn&amp;rsquo;t run into the hardware bugs. But as the saying goes, live and learn!&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>about</title>
